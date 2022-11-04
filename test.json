@@ -1,0 +1,22 @@
+{
+    "emp": [
+        {
+            "name": "a",
+            "id": "123"
+        },
+        {
+            "name": "b",
+            "id": "345"
+        }
+    ],
+    "dept": [
+        {
+            "dname": "n",
+            "id": "453"
+        }
+    ],
+    "other": "path",
+    "yet-other-key": [
+        "different value"
+    ]
+}
