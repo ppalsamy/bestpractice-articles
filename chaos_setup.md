@@ -9,9 +9,13 @@ Train new DevOps engineers by simulating real-world incidents in a safe, local K
 Ensure the following are installed:
 
 - Docker
+  - `brew install --cask docker`
 - [`kind`](https://kind.sigs.k8s.io/)
+  - `brew install kind`
 - `kubectl`
+  - `brew install kubectl`
 - `helm` (v3+)
+   - `brew install helm` 
 
 ---
 
@@ -22,19 +26,27 @@ kind create cluster --name chaos-demo
 kubectl cluster-info --context kind-chaos-demo
 ```
 ## ⚙️ Step 2: Install Chaos Mesh with Helm
+1. Install Chaos Mesh
 ```
 helm repo add chaos-mesh https://charts.chaos-mesh.org
 helm repo update
-
+```
+2. Create Namespace
+```
 kubectl create ns chaos-mesh
-
+```
+3. Create Chaos Mesh Dashboard
+```
 helm install chaos-mesh chaos-mesh/chaos-mesh \
   -n chaos-mesh \
   --set dashboard.create=true \
   --set chaosDaemon.runtime=containerd \
   --set chaosDaemon.socketPath=/run/containerd/containerd.sock
 ```
-Access the Chaos Mesh Dashboard:
+4. Create Service Account to access Chaos Mesh Dashboard:
+   
+   Follow the steps [provided here](https://chaos-mesh.org/docs/manage-user-permissions/)
+6. Access the Chaos Mesh Dashboard:
 ```
 kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333
 # Open http://localhost:2333 in your browser
