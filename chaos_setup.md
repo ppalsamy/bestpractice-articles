@@ -51,6 +51,20 @@ helm install chaos-mesh chaos-mesh/chaos-mesh \
 kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333
 # Open http://localhost:2333 in your browser
 ```
+7. Moniting
+   ```
+   https://artifacthub.io/packages/helm/metrics-server/metrics-server
+   ```
+9. Prometheus
+    ```
+    https://prometheus-community.github.io/helm-charts/
+    helm repo update
+    kubectl create ns monitoring
+    helm install kps prometheus-community/kube-prometheus-stack -n monitoring \
+      --set grafana.service.type=NodePort \
+      --set grafana.service.nodePort=30001
+   ```
+   
 ## ⚙️ Step 3: Deploy a Sample App
 ```bash
 
@@ -58,6 +72,10 @@ kubectl create deployment web --image=nginx
 kubectl expose deployment web --port=80 --type=ClusterIP
 ```
 ## 🔥 Step 4: Run Chaos Experiments
+Follow the experiment 
+~~~
+https://chaos-mesh.org/docs/simulate-network-chaos-on-kubernetes/
+~~~
 ✅ A. DNS Blackhole Simulation
 dns-blackhole.yaml:
 
