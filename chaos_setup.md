@@ -70,6 +70,8 @@ kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333
 
 kubectl create deployment web --image=nginx
 kubectl expose deployment web --port=80 --type=ClusterIP
+
+https://github.com/stefanprodan/podinfo/tree/master
 ```
 ## 🔥 Step 4: Run Chaos Experiments
 Follow the experiment 
