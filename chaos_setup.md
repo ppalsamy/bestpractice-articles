@@ -51,19 +51,47 @@ helm install chaos-mesh chaos-mesh/chaos-mesh \
 kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333
 # Open http://localhost:2333 in your browser
 ```
-7. Moniting
-   ```
-   https://artifacthub.io/packages/helm/metrics-server/metrics-server
-   ```
-9. Prometheus
-    ```
-    https://prometheus-community.github.io/helm-charts/
+## ⚙️ Step 3: Install Prometheus + Grafana (Operator)
+
+  ```
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
     helm repo update
+
+    # Create a namespace for monitoring
     kubectl create ns monitoring
+
+    # Install kube-prometheus-stack
     helm install kps prometheus-community/kube-prometheus-stack -n monitoring \
       --set grafana.service.type=NodePort \
-      --set grafana.service.nodePort=30001
+      --set grafana.service.nodePort=30001 \
+      --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false 
+
    ```
+That serviceMonitorSelectorNilUsesHelmValues=false is important—it lets Prometheus discover ServiceMonitor objects from other namespaces
+
+ServiceMonitor setup (serviceMonitor_all.yaml)
+```
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: all-services
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      monitoring: enabled
+  namespaceSelector:
+    any: true
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+```
+apply it
+```
+kubectl apply -f servicemonitor-podinfo.yaml
+
+```
    Access Grafana - localhost:3000
    ```
    kubectl port-forward -n monitoring svc/kps-grafana 3000:80
@@ -72,95 +100,38 @@ kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333
    ```
    kubectl get secret kps-grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
    ```
-## ⚙️ Step 3: Deploy a Sample App
-```bash
-https://github.com/stefanprodan/podinfo/tree/master
+## ⚙️ Step 4: Deploy a Sample App
+
+Below steps to deploy app using [stefanprodan/podinfo](https://github.com/stefanprodan/podinfo/tree/master?tab=readme-ov-file#helm)
 ```
+helm repo add podinfo https://stefanprodan.github.io/podinfo
+
+helm upgrade --install --wait frontend \
+--namespace test \
+--set replicaCount=2 \
+--set backend=http://backend-podinfo:9898/echo \
+ --set service.labels.monitoring=enabled \
+podinfo/podinfo
+
+helm test frontend --namespace test
+
+helm upgrade --install --wait backend \
+--namespace test \
+--set redis.enabled=true \
+ --set service.labels.monitoring=enabled \
+podinfo/podinfo
+
+``` 
 Access Frontend - localhost:8080
 ```
    kubectl port-forward -n monitoring svc/frontend-podinfo 8080:9898
 ```
-## 🔥 Step 4: Run Chaos Experiments
+## 🔥 Step 5: Run Chaos Experiments
 Follow the experiment 
 ~~~
 https://chaos-mesh.org/docs/simulate-network-chaos-on-kubernetes/
 ~~~
-✅ A. DNS Blackhole Simulation
-dns-blackhole.yaml:
 
-```yaml
-apiVersion: chaos-mesh.org/v1alpha1
-kind: NetworkChaos
-metadata:
-  name: dns-blackhole
-spec:
-  action: deny
-  mode: one
-  selector:
-    namespaces:
-      - default
-    labelSelectors:
-      app: web
-  direction: to
-  target:
-    externalTargets:
-      - "www.google.com"
-  duration: "30s"
-```
-Apply:
-
-```kubectl apply -f dns-blackhole.yaml```
-✅ B. Broken Deployment (Crash on Startup)
-broken-deploy.yaml:
-
-```yaml
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: broken-app
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: broken-app
-  template:
-    metadata:
-      labels:
-        app: broken-app
-    spec:
-      containers:
-        - name: app
-          image: nginx:broken-tag
-```
-Apply:
-
-```kubectl apply -f broken-deploy.yaml```
-✅ C. API Latency Simulation
-api-latency.yaml:
-
-```yaml
-
-apiVersion: chaos-mesh.org/v1alpha1
-kind: NetworkChaos
-metadata:
-  name: api-latency
-spec:
-  action: delay
-  mode: one
-  selector:
-    labelSelectors:
-      app: web
-  delay:
-    latency: '5000ms'
-  duration: '30s'
-  direction: to
-```
-Apply:
-
-```bash
-kubectl apply -f api-latency.yaml
-```
 🧹 Cleanup
 ```
 kubectl delete networkchaos dns-blackhole api-latency
