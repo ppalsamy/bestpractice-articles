@@ -46,7 +46,7 @@ helm install chaos-mesh chaos-mesh/chaos-mesh \
 4. Create Service Account to access Chaos Mesh Dashboard:
    
    Follow the steps [provided here](https://chaos-mesh.org/docs/manage-user-permissions/)
-6. Access the Chaos Mesh Dashboard:
+6. Access the Chaos Mesh Dashboard (localhost:2333):
 ```
 kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333
 # Open http://localhost:2333 in your browser
@@ -64,14 +64,21 @@ kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333
       --set grafana.service.type=NodePort \
       --set grafana.service.nodePort=30001
    ```
-   
+   Access Grafana - localhost:3000
+   ```
+   kubectl port-forward -n monitoring svc/kps-grafana 3000:80
+   ```
+   Get Admin Creds
+   ```
+   kubectl get secret kps-grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+   ```
 ## ⚙️ Step 3: Deploy a Sample App
 ```bash
-
-kubectl create deployment web --image=nginx
-kubectl expose deployment web --port=80 --type=ClusterIP
-
 https://github.com/stefanprodan/podinfo/tree/master
+```
+Access Frontend - localhost:8080
+```
+   kubectl port-forward -n monitoring svc/frontend-podinfo 8080:9898
 ```
 ## 🔥 Step 4: Run Chaos Experiments
 Follow the experiment 
