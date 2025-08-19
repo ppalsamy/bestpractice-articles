@@ -61,7 +61,7 @@ kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333
     kubectl create ns monitoring
 
     # Install kube-prometheus-stack
-    helm install kps prometheus-community/kube-prometheus-stack -n monitoring \
+    helm install kube-prometheus prometheus-community/kube-prometheus-stack -n monitoring \
       --set grafana.service.type=NodePort \
       --set grafana.service.nodePort=30001 \
       --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false 
@@ -94,11 +94,11 @@ kubectl apply -f servicemonitor-podinfo.yaml
 ```
    Access Grafana - localhost:3000
    ```
-   kubectl port-forward -n monitoring svc/kps-grafana 3000:80
+   kubectl port-forward -n monitoring svc/kube-prometheus-grafana 3000:80
    ```
    Get Admin Creds
    ```
-   kubectl get secret kps-grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+   kubectl get secret kube-prometheus-grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
    ```
 ## ⚙️ Step 4: Deploy a Sample App
 
