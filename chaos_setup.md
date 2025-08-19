@@ -89,7 +89,7 @@ spec:
 ```
 apply it
 ```
-kubectl apply -f servicemonitor-podinfo.yaml
+kubectl apply -f servicemonitor_all.yaml
 
 ```
    Access Grafana - localhost:3000
