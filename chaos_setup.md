@@ -106,6 +106,10 @@ Below steps to deploy app using [stefanprodan/podinfo](https://github.com/stefan
 ```
 helm repo add podinfo https://stefanprodan.github.io/podinfo
 
+#Create test namespace
+kubectl create ns test
+
+#install frontend podinfo in test namespace
 helm upgrade --install --wait frontend \
 --namespace test \
 --set replicaCount=2 \
@@ -115,6 +119,7 @@ podinfo/podinfo
 
 helm test frontend --namespace test
 
+#install backend podinfo in test namespace
 helm upgrade --install --wait backend \
 --namespace test \
 --set redis.enabled=true \
@@ -125,6 +130,10 @@ podinfo/podinfo
 Access Frontend - localhost:8080
 ```
    kubectl port-forward -n monitoring svc/frontend-podinfo 8080:9898
+```
+Access Backend - localhost:8090
+```
+   kubectl port-forward -n monitoring svc/frontend-podinfo 8090:9898
 ```
 ## 🔥 Step 5: Run Chaos Experiments
 Follow the experiment 
