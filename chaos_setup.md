@@ -22,8 +22,8 @@ Ensure the following are installed:
 ## ⚙️ Step 1: Create a Local Kubernetes Cluster (Kind)
 
 ```bash
-kind create cluster --name chaos-demo
-kubectl cluster-info --context kind-chaos-demo
+kind create cluster --name dev-cluster
+kubectl cluster-info --context kind-dev-cluster
 ```
 ## ⚙️ Step 2: Install Chaos Mesh with Helm
 1. Install Chaos Mesh
