@@ -9,7 +9,8 @@ Train new DevOps engineers by simulating real-world incidents in a safe, local K
 Ensure the following are installed:
 
 - Docker
-  - `brew install --cask docker`
+  - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+  - or `brew install --cask docker`
 - [`kind`](https://kind.sigs.k8s.io/)
   - `brew install kind`
 - `kubectl`
@@ -123,7 +124,7 @@ helm test frontend --namespace test
 helm upgrade --install --wait backend \
 --namespace test \
 --set redis.enabled=true \
- --set service.labels.monitoring=enabled \
+--set service.labels.monitoring=enabled \
 podinfo/podinfo
 
 ``` 
@@ -133,7 +134,7 @@ Access Frontend - localhost:8080
 ```
 Access Backend - localhost:8090
 ```
-   kubectl port-forward -n monitoring svc/frontend-podinfo 8090:9898
+   kubectl port-forward -n monitoring svc/backend-podinfo 8090:9898
 ```
 ## 🔥 Step 5: Run Chaos Experiments
 Follow the experiment 
