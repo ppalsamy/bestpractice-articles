@@ -52,6 +52,10 @@ helm install chaos-mesh chaos-mesh/chaos-mesh \
 kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333
 # Open http://localhost:2333 in your browser
 ```
+7. Create token to login
+```
+kubectl create token account-chaos-mesh-manager -n chaos-mesh
+```
 ## ⚙️ Step 3: Install Prometheus + Grafana (Operator)
 
   ```
@@ -115,7 +119,6 @@ helm upgrade --install --wait frontend \
 --namespace test \
 --set replicaCount=2 \
 --set backend=http://backend-podinfo:9898/echo \
- --set service.labels.monitoring=enabled \
 podinfo/podinfo
 
 helm test frontend --namespace test
@@ -124,10 +127,18 @@ helm test frontend --namespace test
 helm upgrade --install --wait backend \
 --namespace test \
 --set redis.enabled=true \
---set service.labels.monitoring=enabled \
 podinfo/podinfo
 
-``` 
+```
+Add label monitoring=enabled
+```
+kubectl patch svc frontend-podinfo -n test \
+-p '{"metadata":{"labels":{"monitoring":"enabled"}}}'
+
+#backend-podinfo
+kubectl patch svc backend-podinfo -n test \
+-p '{"metadata":{"labels":{"monitoring":"enabled"}}}'
+```
 Access Frontend - localhost:8080
 ```
    kubectl port-forward -n monitoring svc/frontend-podinfo 8080:9898
@@ -144,8 +155,5 @@ https://chaos-mesh.org/docs/simulate-network-chaos-on-kubernetes/
 
 🧹 Cleanup
 ```
-kubectl delete networkchaos dns-blackhole api-latency
-kubectl delete deployment broken-app web
-kubectl delete service web
 kind delete cluster --name chaos-demo
 ```
